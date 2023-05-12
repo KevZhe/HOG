@@ -1,14 +1,7 @@
-import argparse
 import numpy as np
-from PIL import Image
 import os
 import cv2
-
-
-#parser for image input
-parser = argparse.ArgumentParser(description='HOG')
-parser.add_argument('--image', type=str, default='example.jpg', help='Path to image.')
-args = parser.parse_args()
+import math
 
 # 3x3 masks for sobel operator
 Gx = np.array([
@@ -113,13 +106,15 @@ def compute_histogram(cell_mag, cell_grad):
     #initialize histogram for cell
     histogram = [0 for _ in range(9)]
 
-    n_rows, n_cols =  cell.shape[0], cell.shape[1]
+    n_rows, n_cols =  cell_mag.shape[0], cell_mag.shape[1]
 
     for i in range(n_rows):
         for j in range(n_cols):
 
-            magnitude, angle = mags[i], angles[i]
+            #get magnitude and angle
+            magnitude, angle = cell_mag[i][j], cell_grad[i][j]
 
+            #if angle >=180, subtract 180 from it
             if angle >= 180: 
                 angle -= 180
             
@@ -142,24 +137,57 @@ def compute_histogram(cell_mag, cell_grad):
 
     return histogram
 
-def HOG(grad_mag_normalized, gradient_angles, cell_size, block_size, step_size):
+
+def feature_of_block(block_magnitudes, block_gradient, cell_size):
+    #initialize concatenation of all histograms of block
+    block_histogram = np.empty((0,))
+
+    #for all cells in block, compute histogram and add to 
+    for i in range(0, block_magnitudes.shape[0], cell_size):
+        for j in range(0, block_magnitudes.shape[1], cell_size):
+            #get cell from block
+            cell_mag, cell_grad  = block_magnitudes[i:i+cell_size, j:j+cell_size], block_gradient[i:i+cell_size, j:j+cell_size]
+            #compute histogram of oriented gradients
+            hist = np.array(compute_histogram(cell_mag, cell_grad))
+            #concat to block histogram
+            block_histogram = np.concatenate((block_histogram, hist))
+    
+    #L2 Normalization
+    block_histogram_normalized = block_histogram / np.sqrt(np.sum(np.square(block_histogram)))
+
+    return block_histogram_normalized
+
+
+def HOG_feature_vector(grad_mag_normalized, gradient_angles, cell_size, block_size, step_size):
+
     #cell size = 8x8, block size = 16x16, step size  = 8 pixels
     n_rows, n_cols = grad_mag_normalized.shape[0], grad_mag_normalized.shape[1]
-    for i in range(0, n_rows, step_size):
-        
-    #TODO 
-    """
-    loop over blocks, compute histograms for each cell in block, concat together
-    block normalization (L2)
-    leave histogram and final feature values as floating point numbers
-    """
 
-def main():
-    #read in filename of image
-    filename = args.image
+    #final feature vector
+    feature_vector = np.empty((0,))
+
+    for i in range(0, n_rows - block_size + 1, step_size):
+        for j in range(0, n_cols - block_size + 1, step_size):
+
+            #fetch block magnitudes and gradients
+            block_magnitudes, block_gradients = grad_mag_normalized[i:i+block_size, j:j+block_size], gradient_angles[i:i+block_size, j:j+block_size]
+            #compute normalized block histogram
+            block_histogram_normalized = feature_of_block(block_magnitudes, block_gradients, cell_size)
+            #add histograms from block to feature vector
+            feature_vector = np.concatenate((feature_vector, block_histogram_normalized))
+
+    #normalized HOG Vector
+    HOG_feature_normalized = feature_vector / np.sum(feature_vector)
+
+    print("feature size:", HOG_feature_normalized.shape)
+
+    return HOG_feature_normalized
+
+
+def HOG(filepath):
 
     #read in image with RGB flag
-    im = cv2.imread("data/" + filename, 1)
+    im = cv2.imread(filepath, 1)
     
     print("Original Image Shape:", im.shape)
 
@@ -168,8 +196,11 @@ def main():
     
     print("Grayscale Image Shape:", gray.shape)
 
+    #compute gradient magnitudes and gradient angles
     grad_mag_normalized, gradient_angles = gradient_operator(gray)
 
-    features = HOG(grad_mag_normalized, gradient_angles, cell_size = 8, block_size = 16, step_size = 8)
-if __name__ == "__main__":
-    main()
+    #get final feature vector
+    features = HOG_feature_vector(grad_mag_normalized, gradient_angles, cell_size = 8, block_size = 16, step_size = 8)
+
+    return features
+
