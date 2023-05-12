@@ -93,9 +93,9 @@ def gradient_operator(img):
     gradient_angles = np.arctan(grad_y / grad_x) * (180/np.pi)
 
     #set values where both Gx and Gy are 0, to 0
-    n, m =  img.shape[0], img.shape[1]
-    for i in range(n):
-        for j in range(m):
+    n_rows, n_cols =  img.shape[0], img.shape[1]
+    for i in range(n_rows):
+        for j in range(n_cols):
             if grad_x[i][j] == 0 and grad_y[i][j] == 0:
                 grad_mag_normalized[i][j] = 0
                 gradient_angles[i][j] = 0
@@ -103,26 +103,50 @@ def gradient_operator(img):
     return grad_mag_normalized, gradient_angles
 
 #histogram bins, bin # mapped to bin center
-bins = {}
+bin_centers = {}
 for i in range(1,10):
-    bins[i] = 20*(i-1) + 10
+    bin_centers[i] = 20*(i-1) + 10
 
 #get histogram of oriented gradients from one cell (8x8)
-def compute_histogram(cell):
+def compute_histogram(cell_mag, cell_grad):
 
-    histogram = [0 for _ in range(10)]
+    #initialize histogram for cell
+    histogram = [0 for _ in range(9)]
 
-    n =  cell.shape[0]
+    n_rows, n_cols =  cell.shape[0], cell.shape[1]
 
-    for i in range(n):
-        for j in range(n):
-            angle =  cell[i,j]
-            #stuff on the hw
+    for i in range(n_rows):
+        for j in range(n_cols):
+
+            magnitude, angle = mags[i], angles[i]
+
+            if angle >= 180: 
+                angle -= 180
+            
+            #angle is < 10 or angle > 170
+            if angle < bin_centers[1] or angle >= bin_centers[9]:
+                left_bin_idx = 9
+                right_bin_idx = 1
+            #otherwise find matching bins
+            else:
+                left_bin_idx = math.floor((angle - 10) / 20) + 1
+                right_bin_idx = left_bin_idx + 1
+
+            #if less than first bin center, use reference angle
+            if angle < bin_centers[1]: angle += 180
 
 
-def HOG(grad_mag_normalized, gradient_angles):
+            #calculate adjustments
+            histogram[left_bin_idx - 1] += magnitude * (1 - ((angle - bin_centers[left_bin_idx]) / 20))
+            histogram[right_bin_idx - 1] += magnitude * ((angle - bin_centers[left_bin_idx]) / 20)
+
+    return histogram
+
+def HOG(grad_mag_normalized, gradient_angles, cell_size, block_size, step_size):
     #cell size = 8x8, block size = 16x16, step size  = 8 pixels
-
+    n_rows, n_cols = grad_mag_normalized.shape[0], grad_mag_normalized.shape[1]
+    for i in range(0, n_rows, step_size):
+        
     #TODO 
     """
     loop over blocks, compute histograms for each cell in block, concat together
@@ -146,5 +170,6 @@ def main():
 
     grad_mag_normalized, gradient_angles = gradient_operator(gray)
 
+    features = HOG(grad_mag_normalized, gradient_angles, cell_size = 8, block_size = 16, step_size = 8)
 if __name__ == "__main__":
     main()
