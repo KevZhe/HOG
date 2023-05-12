@@ -23,8 +23,10 @@ class KNearestNeighbor(object):
         # compute distances between X and all examples in the training set
         if method == "histogram_intersection":
             dists = self._histogram_intersection(X, self.X_train)
-        else:
+        elif method == "hellinger":
             dists = self._hellinger(X, self.X_train)
+        else:
+            raise ValueError(f"Invalid method: {method}")
 
         # Return the indices of k neighbors
         idx = np.argsort(dists)[:self.k]

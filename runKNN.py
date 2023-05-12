@@ -6,7 +6,7 @@ import glob
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-k", "--knn", type=int, default=3, help="k value for kNN")
-parser.add_argument("-m", "--method", type=str, default="histogram_intersection", help="method for computing distance")
+#parser.add_argument("-m", "--method", type=str, default="histogram_intersection", help="method for computing distance")
 parser.add_argument("-d", "--dataset", type=str, help="dataset to use")
 
 args = vars(parser.parse_args())
@@ -50,10 +50,13 @@ def main():
     knn.fit(np.array(train_features), np.array(train_labels))
 
     # Test kNN classifier
-    predictions = []
+    histogram_predictions = []
     for feature in test_features:
-        predictions.append(knn.predict(feature, method=args["method"])[0])
+        histogram_predictions.append(knn.predict(feature, method="histogram_intersection")[0])
     
+    hellinger_predictions = []
+    for feature in test_features:
+        hellinger_predictions.append(knn.predict(feature, method="hellinger")[0])
 
 if __name__ == "__main__":
     main()
