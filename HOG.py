@@ -285,8 +285,3 @@ def HOG(filepath, normalized = True):
         return features_normalized
     else:
         return features
-
-t1 =  HOG("data/Test_Images_Pos/T1.bmp")
-t2 =  HOG("data/Test_Images_Pos/T2.bmp")
-
-print(np.sum(np.minimum(t1, t2), axis=0))

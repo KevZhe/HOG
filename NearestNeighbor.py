@@ -11,27 +11,13 @@ class KNearestNeighbor(object):
     def _hellinger(self, X, S):
         # S is an N x D matrix where each row is an example
         # X is a single D-dimensional example
-
-        # Computer the Hellinger distance between the input vector and all examples in the training set
-        """
-        print(f'X: {X}')
-        print(f'X shape: {X.shape}')
-        print(f'S: {S}')
-        print(f'S shape: {S.shape}')
-
-        print(f'X * S: {X * S}')
-        print(f'X * S shape: {(X * S).shape}')
-        payload = 1 - np.sum(np.sqrt(X * S), axis=1)
-        print(f'payload: {payload}')
-        print(f'payload shape: {payload.shape}')
-        """
         
         return 1 - np.sum(np.sqrt(X * S), axis=1)
 
     def _histogram_intersection(self, X, S):
         return 1 - np.sum(np.minimum(X, S), axis=1)
 
-    def predict(self, X, method="histogram_intersection"):
+    def predict(self, X, method):
         # compute distances between X and all examples in the training set
         if method == "histogram_intersection":
             dists = self._histogram_intersection(X, self.X_train)
