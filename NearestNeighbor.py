@@ -13,6 +13,7 @@ class KNearestNeighbor(object):
         # X is a single D-dimensional example
 
         # Computer the Hellinger distance between the input vector and all examples in the training set
+        """
         print(f'X: {X}')
         print(f'X shape: {X.shape}')
         print(f'S: {S}')
@@ -23,7 +24,7 @@ class KNearestNeighbor(object):
         payload = 1 - np.sum(np.sqrt(X * S), axis=1)
         print(f'payload: {payload}')
         print(f'payload shape: {payload.shape}')
-        assert()
+        """
         
         return 1 - np.sum(np.sqrt(X * S), axis=1)
 
@@ -46,4 +47,4 @@ class KNearestNeighbor(object):
         k_closest_classes = self.y_train[idx]
 
         # return the most common class label, the indices of the closest neighbors, and the distances to the closest neighbors
-        return np.argmax(np.bincount(k_closest_classes)), idx, dists[idx]
+        return (np.argmax(np.bincount(k_closest_classes)), idx, dists[idx])

@@ -45,14 +45,6 @@ def main():
     for filename in test_filenames:
         test_features.append(HOG(filename))
 
-    print(f'train features: {np.array(train_features)}')
-    print(f'train features shape: {np.array(train_features).shape}')
-    print(f'train labels: {np.array(train_labels)}')
-
-    # if nan replace with 0
-    train_features = np.nan_to_num(train_features)
-    test_features = np.nan_to_num(test_features)
-
     # Train kNN classifier
     knn = KNearestNeighbor(k=args["knn"])
     knn.fit(np.array(train_features), np.array(train_labels))
@@ -60,13 +52,43 @@ def main():
     # Test kNN classifier
     histogram_predictions = []
     for feature in test_features:
-        histogram_predictions.append(knn.predict(feature, method="histogram_intersection")[0])
+        histogram_predictions.append(knn.predict(feature, method="histogram_intersection"))
     
     hellinger_predictions = []
     for feature in test_features:
-        hellinger_predictions.append(knn.predict(feature, method="hellinger")[0])
+        hellinger_predictions.append(knn.predict(feature, method="hellinger"))
 
-    print("Histogram Intersection Predictions: \n", histogram_predictions)
-    print("Hellinger Predictions: \n", hellinger_predictions)
+    # Get accuracies
+    histogram_correct = 0
+    for prediction, label in zip(histogram_predictions, test_labels):
+        if prediction[0] == label:
+            histogram_correct += 1
+    histogram_accuracy = histogram_correct / len(test_labels)
+    
+    hellinger_correct = 0
+    for prediction, label in zip(hellinger_predictions, test_labels):
+        if prediction[0] == label:
+            hellinger_correct += 1
+    hellinger_accuracy = hellinger_correct / len(test_labels)
+    
+    print(f'histogram_intersection accuracy: {histogram_accuracy}')
+    print(f'hellinger accuracy: {hellinger_accuracy}')
+
+    for ind, prediction in enumerate(histogram_predictions):
+        pred, idxs, dists = prediction
+        print(f'histogram_intersection for: {test_filenames[ind]}')
+        print(f'prediction: {pred}')
+        for idx, dist in zip(idxs, dists):
+            print(f'idx: {train_filenames[idx]}, dist: {dist}')
+        print()
+    
+    for ind, prediction in enumerate(hellinger_predictions):
+        pred, idxs, dists = prediction
+        print(f'hellinger for: {test_filenames[ind]}')
+        print(f'prediction: {pred}')
+        for idx, dist in zip(idxs, dists):
+            print(f'idx: {train_filenames[idx]}, dist: {dist}')
+        print()
+        
 if __name__ == "__main__":
     main()
