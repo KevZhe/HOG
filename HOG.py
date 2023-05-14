@@ -256,7 +256,7 @@ def HOG_feature_vector(grad_mag_normalized, gradient_angles, cell_size, block_si
     return HOG_feature_normalized, feature_vector
 
 
-def HOG(filepath, normalized = True):
+def HOG(filepath, normalized = True, magnitudes = False):
     """
     Computes HOG feature vector from image
     Args:
@@ -273,6 +273,10 @@ def HOG(filepath, normalized = True):
 
     #compute gradient magnitudes and gradient angles
     grad_mag_normalized, gradient_angles = gradient_operator(gray)
+
+    #return normalized gradient magnitudes
+    if magnitudes == True:
+        return grad_mag_normalized
 
     #get final feature vector
     features_normalized, features = HOG_feature_vector(grad_mag_normalized, gradient_angles, cell_size = 8, block_size = 16, step_size = 8)
