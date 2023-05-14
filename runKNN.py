@@ -7,7 +7,7 @@ import glob
 parser = argparse.ArgumentParser()
 parser.add_argument("-k", "--knn", type=int, default=3, help="k value for kNN")
 #parser.add_argument("-m", "--method", type=str, default="histogram_intersection", help="method for computing distance")
-parser.add_argument("-d", "--dataset", type=str, help="dataset to use")
+parser.add_argument("-d", "--dataset", type=str, help="path to dataset to use")
 
 args = vars(parser.parse_args())
 
