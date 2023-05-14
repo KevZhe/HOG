@@ -29,5 +29,5 @@ def func(mags, angles):
             histogram[right_bin_idx - 1] += magnitude * ((angle - bin_centers[left_bin_idx]) / 20)
 
     print("Final Histogram: \n", histogram)
-func(mags = [100, 160, 220, 50, 100, 1000, 20], 
-     angles = [35,110,186, 0, 100, 350, 10])
+func(mags = [10, 10], 
+     angles = [348, 348])

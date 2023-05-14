@@ -83,7 +83,7 @@ def gradient_operator(img):
     grad_mag_normalized = min_max_normalization(grad_mag)
 
     #compute gradient angles
-    gradient_angles = np.arctan(grad_y / grad_x) * (180/np.pi)
+    gradient_angles = np.arctan2(grad_y,grad_x) * (180/np.pi)
 
     #set values where both Gx and Gy are 0, to 0
     n_rows, n_cols =  img.shape[0], img.shape[1]
@@ -93,6 +93,8 @@ def gradient_operator(img):
                 grad_mag_normalized[i][j] = 0
                 gradient_angles[i][j] = 0
     
+    grad_mag_normalized = np.nan_to_num(grad_mag_normalized, nan=0)
+    gradient_angles = np.nan_to_num(gradient_angles, nan=0)
     return grad_mag_normalized, gradient_angles
 
 #histogram bins, bin # mapped to bin center
@@ -115,11 +117,16 @@ def compute_histogram(cell_mag, cell_grad):
             magnitude, angle = cell_mag[i][j], cell_grad[i][j]
 
             #if angle >=180, subtract 180 from it
+            if angle < 0 : 
+                angle += 360
+
+            #if angle >=180, subtract 180 from it
             if angle >= 180: 
                 angle -= 180
             
             #angle is < 10 or angle > 170
             if angle < bin_centers[1] or angle >= bin_centers[9]:
+
                 left_bin_idx = 9
                 right_bin_idx = 1
             #otherwise find matching bins
@@ -130,11 +137,12 @@ def compute_histogram(cell_mag, cell_grad):
             #if less than first bin center, use reference angle
             if angle < bin_centers[1]: angle += 180
 
-
+            #print(magnitude, angle, left_bin_idx, right_bin_idx)
             #calculate adjustments
             histogram[left_bin_idx - 1] += magnitude * (1 - ((angle - bin_centers[left_bin_idx]) / 20))
             histogram[right_bin_idx - 1] += magnitude * ((angle - bin_centers[left_bin_idx]) / 20)
 
+    assert np.all(np.array(histogram) >= 0)
     return histogram
 
 
@@ -179,7 +187,7 @@ def HOG_feature_vector(grad_mag_normalized, gradient_angles, cell_size, block_si
     #normalized HOG Vector
     HOG_feature_normalized = feature_vector / np.sum(feature_vector)
 
-    print("feature size:", HOG_feature_normalized.shape)
+    #print("feature size:", HOG_feature_normalized.shape)
 
     return HOG_feature_normalized
 
@@ -189,12 +197,12 @@ def HOG(filepath):
     #read in image with RGB flag
     im = cv2.imread(filepath, 1)
     
-    print("Original Image Shape:", im.shape)
+    #print("Original Image Shape:", im.shape)
 
     #convert to gray scale
     gray = rgb_to_gray(im)
     
-    print("Grayscale Image Shape:", gray.shape)
+    #print("Grayscale Image Shape:", gray.shape)
 
     #compute gradient magnitudes and gradient angles
     grad_mag_normalized, gradient_angles = gradient_operator(gray)
@@ -204,3 +212,4 @@ def HOG(filepath):
 
     return features
 
+HOG("data/T1.bmp")

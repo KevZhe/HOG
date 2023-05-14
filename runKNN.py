@@ -58,5 +58,7 @@ def main():
     for feature in test_features:
         hellinger_predictions.append(knn.predict(feature, method="hellinger")[0])
 
+    print("Histogram Intersection Predictions: \n", histogram_predictions)
+    print("Hellinger Predictions: \n", hellinger_predictions)
 if __name__ == "__main__":
     main()
