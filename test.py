@@ -30,4 +30,4 @@ def func(mags, angles):
 
     print("Final Histogram: \n", histogram)
 func(mags = [10, 10], 
-     angles = [348, 348])
+     angles = [359, 359])

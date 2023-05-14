@@ -13,7 +13,7 @@ def write_features(files, path):
             for line in vals:
                 f.write(str(line) + '\n')
             f.close()
-
+        
 def main():
     #images to compute features on
     db_images = ["DB_Images_Pos/DB2.bmp", "DB_Images_Pos/DB9.bmp", "DB_Images_Neg/DB15.bmp"]
