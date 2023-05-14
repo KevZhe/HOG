@@ -45,6 +45,14 @@ def main():
     for filename in test_filenames:
         test_features.append(HOG(filename))
 
+    print(f'train features: {np.array(train_features)}')
+    print(f'train features shape: {np.array(train_features).shape}')
+    print(f'train labels: {np.array(train_labels)}')
+
+    # if nan replace with 0
+    train_features = np.nan_to_num(train_features)
+    test_features = np.nan_to_num(test_features)
+
     # Train kNN classifier
     knn = KNearestNeighbor(k=args["knn"])
     knn.fit(np.array(train_features), np.array(train_labels))

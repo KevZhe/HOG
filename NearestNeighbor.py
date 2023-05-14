@@ -13,6 +13,17 @@ class KNearestNeighbor(object):
         # X is a single D-dimensional example
 
         # Computer the Hellinger distance between the input vector and all examples in the training set
+        print(f'X: {X}')
+        print(f'X shape: {X.shape}')
+        print(f'S: {S}')
+        print(f'S shape: {S.shape}')
+
+        print(f'X * S: {X * S}')
+        print(f'X * S shape: {(X * S).shape}')
+        payload = 1 - np.sum(np.sqrt(X * S), axis=1)
+        print(f'payload: {payload}')
+        print(f'payload shape: {payload.shape}')
+        assert()
         
         return 1 - np.sum(np.sqrt(X * S), axis=1)
 
