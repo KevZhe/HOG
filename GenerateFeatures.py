@@ -10,8 +10,13 @@ def write_features(files, path):
         img_name = re.split("/|\.", image)[1]
         #write feature values to file
         with open(path + img_name + ".txt", 'w') as f:
+            c = 1
             for line in vals:
-                f.write(str(line) + '\n')
+                if c == 7524:
+                    f.write(str(line))
+                else:
+                    f.write(str(line) + '\n')
+                c += 1 
             f.close()
         
 def main():
